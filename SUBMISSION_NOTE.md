@@ -1,74 +1,112 @@
-# TripWise — Methodology Note
+# TripWise — Updated Submission Note
 
-## 1. Who I am advising
+## 1. Product intent
 
-I designed TripWise for a **general leisure/city-break traveller** who mainly wants to know whether outdoor plans are sensible and what to pack. This keeps the decision rules useful across sightseeing, casual outdoor activities and city travel rather than optimising for a specialist group such as trekkers.
+TripWise is designed for a general leisure or city-break traveller who wants to decide whether outdoor plans are sensible and what to pack. The product deliberately turns a dense weather forecast into a small number of confident, useful decisions.
 
-## 2. What signals I use and why
+The experience is organised around three questions:
 
-I intentionally do not treat every API field as equally important.
+1. **Can I enjoy this day outside?**
+2. **What should I prepare for?**
+3. **What should I do next?**
 
-- **Rain probability + precipitation amount:** the strongest disruption signal. A high chance of rain or meaningful precipitation changes whether outdoor plans are comfortable.
-- **Maximum temperature:** catches hot days where the user should move outdoor activities to cooler hours.
-- **Minimum temperature:** catches cold mornings/evenings and drives the need for a warm layer.
-- **UV index:** affects sun-protection advice even when the temperature itself is comfortable.
-- **Maximum wind speed:** catches days where exposed outdoor activities may become uncomfortable.
-- **Weather code:** used as supporting context for precipitation severity.
+The first two are answered by the forecast cards and packing list. The third is supported by the bonus insights and the TripMate companion.
 
-The interface shows the key numbers, but the main output is a sentence. This follows the product goal: users should not have to interpret a weather table themselves.
+## 2. Signals and reasoning
 
-## 3. Thresholds and priority
+I do not treat every API field as equally important. The main decision signals are:
 
-The rules are deliberately simple and deterministic.
+- **Rain probability and precipitation amount:** the strongest disruption signal for outdoor plans.
+- **Maximum temperature:** identifies heat that may require cooler-hour planning.
+- **Minimum temperature:** identifies cold mornings and evenings.
+- **UV index:** changes sun-protection advice even when temperatures are comfortable.
+- **Maximum wind speed:** identifies exposed or uncomfortable conditions.
+- **Weather code:** provides supporting context for precipitation classification.
 
-**Plan around it**
-- Rain probability ≥ 70% OR precipitation ≥ 10 mm.
-- Maximum temperature ≥ 38°C.
-- Maximum wind ≥ 40 km/h.
-- Very severe combinations, such as rain plus heat/wind, are also prioritised here.
+The interface leads with a sentence rather than a table. The numbers are still shown as supporting evidence, but the traveller does not have to interpret them alone.
 
-**Watch**
-- Rain probability ≥ 45% OR precipitation ≥ 5 mm.
-- Maximum temperature ≥ 33°C with high UV.
-- Minimum temperature ≤ 5°C.
-- Minimum temperature ≤ 12°C for a cooler-day warning.
+## 3. Verdict thresholds and priority
 
-**Good**
-- Conditions that do not cross the above thresholds.
-- UV ≥ 6 adds a sun-protection reminder without making an otherwise good day a bad day.
+The rules are deterministic and intentionally easy to explain.
 
-When several things go wrong, the most disruptive condition wins. For example, severe rain takes priority over a minor UV warning. The user still receives exactly one clear sentence for the day.
+**Plan around it** is used for:
+
+- rain probability of at least 70% or precipitation of at least 10 mm;
+- very hot conditions at 38°C or above;
+- strong wind at 40 km/h or above;
+- severe weather combinations, such as rain combined with heat or strong wind.
+
+**Watch** is used for:
+
+- rain probability of at least 45% or precipitation of at least 5 mm;
+- hot conditions at 33°C or above when UV is also high;
+- minimum temperature at 5°C or below;
+- cooler conditions at 12°C or below overnight.
+
+**Good** is used when no stronger warning is triggered. UV of 6 or above can add a sun-protection reminder without turning an otherwise good day into a bad one.
+
+When several conditions occur together, the most disruptive condition wins. Each day still receives one clear verdict and one plain-language explanation.
 
 ## 4. Packing logic
 
-The packing list is generated across the entire selected trip and then deduplicated. For example, if rain is forecast on three different days, the user gets one rain-layer item rather than three separate entries.
+TripWise creates one list for the complete selected date range and deduplicates it. This avoids repeating the same item for every rainy or cool day.
 
-Typical additions include:
-- waterproof rain jacket or compact umbrella when rain is meaningful,
-- breathable clothes and quick-dry clothing when warmth + rain overlap,
-- sunscreen and sunglasses when UV is elevated,
-- cap/sun hat when heat and UV overlap,
-- a warm layer or light jacket for cool mornings/evenings,
-- wind-resistant layers when winds are stronger,
+Typical recommendations include:
+
+- waterproof rainwear or a compact umbrella;
+- breathable or quick-dry clothing for warm and wet combinations;
+- sunscreen, sunglasses and a cap when UV or heat is elevated;
+- a warm layer or light jacket for cool mornings and evenings;
+- wind-resistant layers for stronger winds;
 - water-resistant footwear when heavier rainfall is expected.
 
-## 5. One deliberate omission
+The list can now be copied directly, making the output useful while packing rather than only informative inside the page.
 
-I deliberately left **hourly forecast data** out of this MVP. Hourly information can make the interface much noisier, while the core question is trip-level planning. I would add it next to improve time-specific advice such as "avoid 1–4pm" when the daily data indicates heat.
+## 5. TripMate companion
 
-## 6. What I would build next
+TripMate is a small browser-only planning companion. It uses the selected destination and forecast already present in the page to answer basic questions about:
 
-1. Add hourly analysis so verdicts can recommend the best time window for outdoor plans.
-2. Add a simple activity selector (sightseeing, beach, hiking, event) so thresholds can adapt to the trip.
-3. Add forecast-confidence / change indicators when a forecast moves significantly between searches.
-4. Add richer weather icons and accessibility improvements after usability testing.
+- what to pack;
+- whether conditions are suitable for outdoor plans;
+- where to start looking for markets, shopping streets or malls;
+- simple food and itinerary ideas.
 
+It intentionally does not claim to know live shops, restaurants, opening hours or current venue availability. Shopping suggestions are generic planning guidance, and the interface says so. This keeps the feature useful without adding a backend, API key or misleading location data.
 
-## Bonus features
+A future connected version could add a trusted places provider after the core decision experience is validated.
 
-I added three small decision-support features beyond the core brief:
-- **Best outdoor day** ranks the selected days using the same core weather signals.
-- **Dominant weather pattern** explains whether rain, heat, wind or stable conditions define the trip.
-- **Trip confidence** tells the user whether conditions are consistent or vary significantly across the chosen dates.
+## 6. Interaction and accessibility improvements
 
-These features were kept lightweight so the product remains a weather decision tool rather than becoming a dashboard.
+The updated interface adds:
+
+- staggered result-card entrance animations;
+- a lightweight typing state for TripMate responses;
+- hover and focus states for interactive controls;
+- a responsive assistant panel that works on mobile and desktop;
+- keyboard-visible focus styling;
+- a `prefers-reduced-motion` mode;
+- responsive wrapping for long verdicts, badges, legends and methodology text.
+
+The animation system is deliberately restrained: it reinforces hierarchy and state changes without competing with the weather advice.
+
+## 7. Deliberate omission and next steps
+
+Hourly forecast data is intentionally out of scope for this MVP. Daily signals are enough to answer the core trip-level question without turning the page into a dashboard.
+
+The next useful iterations would be:
+
+1. add hourly analysis for advice such as “plan outdoor time before 11am”;
+2. add an activity selector for sightseeing, beach days, hikes or events;
+3. add forecast-change indicators between searches;
+4. connect TripMate to a trusted places source for verified local recommendations;
+5. add richer weather iconography after usability testing.
+
+## 8. Feature summary
+
+Beyond the core daily verdict, the current submission includes:
+
+- **Best outdoor day:** ranks selected days using the same weather signals;
+- **Dominant weather pattern:** explains whether rain, heat, wind or stable conditions define the trip;
+- **Trip confidence:** describes how consistent the selected days are;
+- **TripMate:** provides lightweight, contextual planning help;
+- **Copyable packing list:** turns the generated advice into an immediately usable checklist.

@@ -25,7 +25,14 @@ let tripDays = [];
 
 const today = new Date();
 today.setHours(0,0,0,0);
-const toISO = d => d.toISOString().slice(0,10);
+// Keep date inputs tied to the user's local calendar. Using toISOString() here
+// can shift the displayed day for users west of UTC.
+const toISO = d => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 const maxDate = new Date(today);
 maxDate.setDate(maxDate.getDate() + 14);
 
