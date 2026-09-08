@@ -1,4 +1,4 @@
-# TripWise — Updated Submission Note
+# TripWise — Submission Note
 
 ## 1. Product intent
 
