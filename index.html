@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="TripWise turns a weather forecast into a simple trip verdict and packing list.">
+  <title>TripWise — Weather that helps you decide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">✦</div>
+      <div>
+        <div class="brand-name">TripWise</div>
+        <div class="brand-tag">Weather that helps you decide.</div>
+      </div>
+    </div>
+    <div class="live-pill"><span></span> Live forecast</div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow">PLAN AHEAD · UP TO 14 DAYS</div>
+      <h1>Will the weather<br><em>work for your trip?</em></h1>
+      <p>Skip the wall of numbers. Tell us where you're going and when, and we'll turn the forecast into clear daily advice and one practical packing list.</p>
+
+      <form id="searchForm" class="search-card" novalidate>
+        <div class="field">
+          <label for="cityInput">Destination</label>
+          <div class="input-wrap">
+            <span class="input-icon">⌖</span>
+            <input id="cityInput" name="city" type="text" autocomplete="off" placeholder="e.g. Jaipur, New Delhi, Paris" required>
+          </div>
+        </div>
+        <div class="date-fields">
+          <div class="field">
+            <label for="startDate">From</label>
+            <input id="startDate" type="date" required>
+          </div>
+          <div class="field">
+            <label for="endDate">To</label>
+            <input id="endDate" type="date" required>
+          </div>
+        </div>
+        <button id="searchBtn" type="submit">
+          <span>Check my trip</span><b>→</b>
+        </button>
+      </form>
+
+      <div id="locationPicker" class="location-picker hidden">
+        <div class="picker-head">
+          <div>
+            <strong>Which place did you mean?</strong>
+            <span>We found more than one match, so we won't silently guess.</span>
+          </div>
+          <button id="closePicker" class="icon-btn" type="button" aria-label="Close">×</button>
+        </div>
+        <div id="locationOptions" class="location-options"></div>
+      </div>
+
+      <div id="formError" class="form-error hidden" role="alert"></div>
+    </section>
+
+    <section id="status" class="status hidden" aria-live="polite"></section>
+
+    <section id="results" class="results hidden">
+      <div class="trip-heading">
+        <div>
+          <div class="eyebrow">YOUR TRIP</div>
+          <h2 id="tripTitle">—</h2>
+          <p id="tripDates">—</p>
+        </div>
+        <button id="newSearch" class="secondary-btn" type="button">New search</button>
+      </div>
+
+      <article id="summaryCard" class="summary-card">
+        <div class="summary-icon" id="summaryIcon">☀</div>
+        <div>
+          <div class="summary-kicker">TRIP OUTLOOK</div>
+          <h3 id="summaryText">—</h3>
+          <p id="summarySupport">—</p>
+        </div>
+      </article>
+
+      <div class="content-grid">
+        <section>
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">DAY BY DAY</div>
+              <h2>What each day feels like</h2>
+            </div>
+            <div class="legend">
+              <span><i class="dot good"></i>Good</span>
+              <span><i class="dot caution"></i>Watch</span>
+              <span><i class="dot poor"></i>Plan around it</span>
+            </div>
+          </div>
+          <div id="forecastList" class="forecast-list"></div>
+        </section>
+
+        <aside class="packing-card">
+          <div class="eyebrow">PACK ONCE</div>
+          <h2>One list for the whole trip</h2>
+          <p class="muted">Condition-driven and deduplicated across every selected day.</p>
+          <div id="packingSummary" class="packing-summary"></div>
+          <ul id="packingList" class="packing-list"></ul>
+          <div class="packing-note">Smart rule: TripWise only adds an item when the forecast gives you a reason to carry it.</div>
+        </aside>
+      </div>
+
+      <section class="bonus-grid">
+        <article class="bonus-card">
+          <div class="eyebrow">BONUS · 01</div>
+          <h3>Best outdoor window</h3>
+          <p id="bestWindowText">Based on the most comfortable part of your trip.</p>
+        </article>
+        <article class="bonus-card">
+          <div class="eyebrow">BONUS · 02</div>
+          <h3>Weather radar, minus the radar</h3>
+          <p id="weatherPatternText">We’ll highlight the biggest pattern across your dates.</p>
+        </article>
+        <article class="bonus-card">
+          <div class="eyebrow">BONUS · 03</div>
+          <h3>Trip confidence</h3>
+          <p id="confidenceText">A simple confidence signal based on how consistent the selected days are.</p>
+        </article>
+      </section>
+
+      <div class="method-note">
+        <span>How TripWise decides</span>
+        <p>Advice prioritises rain, temperature extremes, UV and strong wind. A single daily verdict is produced by giving severe conditions priority over minor ones.</p>
+      </div>
+    </section>
+
+    <footer>
+      <span>TripWise · Built with Open-Meteo</span>
+      <span>Forecast data can change — check again before departure.</span>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
