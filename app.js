@@ -10,9 +10,18 @@ const resultsEl = document.getElementById("results");
 const pickerEl = document.getElementById("locationPicker");
 const locationOptionsEl = document.getElementById("locationOptions");
 const formError = document.getElementById("formError");
+const assistantToggle = document.getElementById("assistantToggle");
+const assistantPanel = document.getElementById("assistantPanel");
+const assistantClose = document.getElementById("assistantClose");
+const assistantMessages = document.getElementById("assistantMessages");
+const assistantForm = document.getElementById("assistantForm");
+const assistantInput = document.getElementById("assistantInput");
+const copyPacking = document.getElementById("copyPacking");
+const copyFeedback = document.getElementById("copyFeedback");
 
 let pendingDates = null;
 let selectedLocation = null;
+let tripDays = [];
 
 const today = new Date();
 today.setHours(0,0,0,0);
@@ -62,6 +71,113 @@ document.getElementById("newSearch").addEventListener("click", () => {
   window.scrollTo({top:0, behavior:"smooth"});
   cityInput.focus();
 });
+
+assistantToggle.addEventListener("click", () => setAssistantOpen(!assistantPanel.classList.contains("is-open")));
+assistantClose.addEventListener("click", () => setAssistantOpen(false));
+assistantForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const question = assistantInput.value.trim();
+  if (!question) return;
+  assistantInput.value = "";
+  answerAssistant(question);
+});
+assistantPanel.querySelectorAll("[data-question]").forEach(button => {
+  button.addEventListener("click", () => answerAssistant(button.dataset.question));
+});
+
+copyPacking.addEventListener("click", async () => {
+  if (!tripDays.length) return showCopyFeedback("Run a trip check first.");
+  const items = buildPackingList(tripDays);
+  const text = `TripWise packing list\n${items.map(item => `• ${item.text} — ${item.tag}`).join("\n")}`;
+  try {
+    await navigator.clipboard.writeText(text);
+    showCopyFeedback("Packing list copied.");
+  } catch {
+    showCopyFeedback("Copy is unavailable in this browser.");
+  }
+});
+
+function setAssistantOpen(open) {
+  assistantPanel.classList.toggle("is-open", open);
+  assistantPanel.setAttribute("aria-hidden", String(!open));
+  assistantToggle.setAttribute("aria-expanded", String(open));
+  if (open) assistantInput.focus();
+}
+
+function answerAssistant(question) {
+  appendAssistantMessage(question, "user");
+  const typing = document.createElement("div");
+  typing.className = "assistant-message assistant-message-bot assistant-message-typing";
+  typing.innerHTML = "<p>Thinking<span> · · ·</span></p>";
+  assistantMessages.appendChild(typing);
+  assistantMessages.scrollTop = assistantMessages.scrollHeight;
+
+  window.setTimeout(() => {
+    typing.remove();
+    appendAssistantMessage(getAssistantResponse(question), "bot");
+  }, 420);
+}
+
+function appendAssistantMessage(text, role) {
+  const message = document.createElement("div");
+  message.className = `assistant-message assistant-message-${role}`;
+  const paragraph = document.createElement("p");
+  paragraph.textContent = text;
+  message.appendChild(paragraph);
+  assistantMessages.appendChild(message);
+  assistantMessages.scrollTop = assistantMessages.scrollHeight;
+}
+
+function getAssistantResponse(question) {
+  const q = question.toLowerCase();
+  const place = selectedLocation ? [selectedLocation.name, selectedLocation.country].filter(Boolean).join(", ") : "your destination";
+
+  if (/(pack|luggage|bring|carry|wear|clothes)/.test(q)) {
+    if (!tripDays.length) return "Run a trip check first and I’ll turn the forecast into a focused packing suggestion.";
+    const items = buildPackingList(tripDays).slice(0, 4).map(item => item.text.toLowerCase());
+    return `For ${place}, start with ${items.join(", ")}. The forecast-based list beside the results has the full version.`;
+  }
+
+  if (/(shop|shopping|buy|souvenir|market|mall|gift)/.test(q)) {
+    return `For ${place}, try a central market for local food and small gifts, a pedestrian shopping street for independent brands, and a mall only when you want convenience. Search Maps for “local market” or “artisan shops” near your stay, then check opening hours before heading out.`;
+  }
+
+  if (/(outdoor|outside|walk|hike|sightsee|sightsee|weather)/.test(q)) {
+    if (!tripDays.length) return "Once you check your dates, I can point out the strongest outdoor window and the days that need a backup plan.";
+    const good = tripDays.filter(day => day.analysis.level === "good").length;
+    const best = [...tripDays].sort((a, b) => outdoorScore(b) - outdoorScore(a))[0];
+    const bestDate = new Date(best.date + "T00:00:00").toLocaleDateString(undefined, {weekday:"long", day:"numeric", month:"short"});
+    return good ? `${good} ${good === 1 ? "day looks" : "days look"} good for outdoor plans. ${bestDate} is your best window; keep a flexible indoor option for the more changeable days.` : `The forecast is mixed, so use ${bestDate} for your longest outdoor plan and keep the rest flexible.`;
+  }
+
+  if (/(eat|food|restaurant|cafe|coffee|dinner)/.test(q)) {
+    return `A good low-effort food plan in ${place} is to book one well-reviewed dinner, leave one meal open for a local market or food hall, and keep a café stop near your busiest sightseeing area.`;
+  }
+
+  if (/(plan|itinerary|do|see|visit|idea|activity)/.test(q)) {
+    return `Try a simple rhythm in ${place}: one neighbourhood walk in the morning, one anchor activity after lunch, and an unplanned hour for a market, café or viewpoint. That keeps the trip flexible if the weather shifts.`;
+  }
+
+  return "I can help with packing, shopping, outdoor timing, food ideas or a simple day plan. Try one of the quick questions below.";
+}
+
+function outdoorScore(day) {
+  let score = 100;
+  if (day.precipitation_probability_max >= 60) score -= 30;
+  else if (day.precipitation_probability_max >= 35) score -= 15;
+  if (day.temperature_2m_max >= 35) score -= 25;
+  else if (day.temperature_2m_max >= 30) score -= 10;
+  if (day.temperature_2m_min <= 8) score -= 10;
+  if (day.wind_speed_10m_max >= 40) score -= 20;
+  if (day.uv_index_max >= 9) score -= 8;
+  return score;
+}
+
+function showCopyFeedback(text) {
+  copyFeedback.textContent = text;
+  window.clearTimeout(showCopyFeedback.timer);
+  showCopyFeedback.timer = window.setTimeout(() => { copyFeedback.textContent = ""; }, 2400);
+}
 
 async function findLocations(city) {
   setStatus("loading", "Finding your destination…");
@@ -216,6 +332,7 @@ function renderResults(place, dates, data) {
     sunrise:d.sunrise?.[i],
     sunset:d.sunset?.[i]
   })).map(x => ({...x, analysis:analyseDay(x)}));
+  tripDays = days;
 
   document.getElementById("tripTitle").textContent = [place.name, place.country].filter(Boolean).join(", ");
   document.getElementById("tripDates").textContent = `${formatLongDate(dates.start)} – ${formatLongDate(dates.end)} · ${days.length} ${days.length === 1 ? "day" : "days"}`;
@@ -239,16 +356,16 @@ function renderResults(place, dates, data) {
   document.getElementById("summarySupport").textContent = support;
   document.getElementById("summaryIcon").textContent = icon;
 
-  document.getElementById("forecastList").innerHTML = days.map(dayCard).join("");
+  document.getElementById("forecastList").innerHTML = days.map((day, index) => dayCard(day, index)).join("");
   renderPacking(days);
   renderBonusInsights(days);
 }
 
-function dayCard(d) {
+function dayCard(d, index = 0) {
   const date = new Date(d.date + "T00:00:00");
   const a = d.analysis;
   return `
-    <article class="forecast-card">
+    <article class="forecast-card" style="--i:${index}">
       <div>
         <div class="day">${date.toLocaleDateString(undefined,{weekday:"short"})}</div>
         <div class="date">${date.toLocaleDateString(undefined,{day:"numeric",month:"short"})}</div>

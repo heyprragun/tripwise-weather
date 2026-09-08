@@ -108,6 +108,8 @@
           <p class="muted">Condition-driven and deduplicated across every selected day.</p>
           <div id="packingSummary" class="packing-summary"></div>
           <ul id="packingList" class="packing-list"></ul>
+          <button id="copyPacking" class="packing-action" type="button">Copy packing list <span>↗</span></button>
+          <div id="copyFeedback" class="copy-feedback" role="status" aria-live="polite"></div>
           <div class="packing-note">Smart rule: TripWise only adds an item when the forecast gives you a reason to carry it.</div>
         </aside>
       </div>
@@ -135,6 +137,40 @@
         <p>Advice prioritises rain, temperature extremes, UV and strong wind. A single daily verdict is produced by giving severe conditions priority over minor ones.</p>
       </div>
     </section>
+
+    <button id="assistantToggle" class="assistant-fab" type="button" aria-expanded="false" aria-controls="assistantPanel">
+      <span class="assistant-spark">✦</span>
+      <span>Ask TripMate</span>
+    </button>
+
+    <aside id="assistantPanel" class="assistant-panel" aria-label="TripMate travel companion" aria-hidden="true">
+      <div class="assistant-head">
+        <div class="assistant-title">
+          <div class="assistant-avatar">✦</div>
+          <div>
+            <strong>TripMate</strong>
+            <span><i></i> Your quick trip companion</span>
+          </div>
+        </div>
+        <button id="assistantClose" class="icon-btn" type="button" aria-label="Close TripMate">×</button>
+      </div>
+      <div id="assistantMessages" class="assistant-messages" aria-live="polite">
+        <div class="assistant-message assistant-message-bot">
+          <p>Hi! I can help you think through shopping, packing, outdoor plans and easy trip ideas.</p>
+        </div>
+      </div>
+      <div class="assistant-prompts" aria-label="Suggested questions">
+        <button type="button" data-question="What should I pack?">What should I pack?</button>
+        <button type="button" data-question="Where should I shop?">Where should I shop?</button>
+        <button type="button" data-question="Is it good for outdoors?">Good for outdoors?</button>
+      </div>
+      <form id="assistantForm" class="assistant-form">
+        <label class="sr-only" for="assistantInput">Ask TripMate a question</label>
+        <input id="assistantInput" type="text" autocomplete="off" placeholder="Ask a quick question…">
+        <button type="submit" aria-label="Send question">↑</button>
+      </form>
+      <div class="assistant-disclaimer">TripMate gives quick planning ideas, not live venue recommendations.</div>
+    </aside>
 
     <footer>
       <span>TripWise · Built with Open-Meteo</span>
